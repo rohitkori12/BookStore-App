@@ -1,0 +1,33 @@
+body{
+  font-family: monospace;
+}
+
+.App {
+  text-align: center;
+}
+
+.AppNav{
+  display: block;
+  font-size:30px;
+  text-align:center;
+  padding:20px;
+} 
+
+/* Added by Rohit for Pagination */
+.active{
+  background-color:white !important;
+  color:black !important;
+}
+
+.inlineBlock{
+  display: inline;
+  padding : 0 5px;
+}
+
+.margin20{
+  margin:20px;
+}
+
+.mAuto{
+  margin:0 auto;
+}
