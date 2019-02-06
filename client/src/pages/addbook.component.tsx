@@ -2,24 +2,27 @@ import React, { Component } from 'react';
 import { browserHistory } from 'react-router';
 import * as bookApi from '../api/bookapi';
 import { Col, Button, Form, FormGroup ,Alert } from 'reactstrap';
-import PropTypes from 'prop-types';
 
 interface State{
     showAlert:boolean
+    showError: boolean
 }
 
-class AddBook extends React.Component<any,State>{
+class AddBook extends Component<any,State>{
     bookname: any;
     author: any;
     cost: any;
     pages: any;
+    ErrorMessage:any;
 
     constructor(props: any) {
         super(props);
         this.state={
-            showAlert:false
+            showAlert:false,
+            showError: false
         }
         this.saveBook = this.saveBook.bind(this);
+        this.validate = this.validate.bind(this);
     }
 
     saveBook() {
@@ -29,18 +32,55 @@ class AddBook extends React.Component<any,State>{
             cost: this.cost.value,
             pages: this.pages.value
         };
+        if(this.validate()){
+            bookApi.saveBooks(book)
+                .then((res: any) => {
+                    console.log(res);
+                    this.setState({
+                        showAlert :true
+                    });
 
-        bookApi.saveBooks(book)
-            .then((res: any) => {
-                console.log(res);
-                this.setState({
-                    showAlert :true
+                    setTimeout(()=>{
+                        browserHistory.push('/');
+                    },2000);
                 });
+        }
+    }
 
-                setTimeout(()=>{
-                    browserHistory.push('/');
-                },2000);
+    validate(){
+        if(this.bookname.value===""){
+            this.ErrorMessage = "Book name field can not be empty";
+            this.setState({
+                showError: true
             });
+            return false;
+        }
+        if(this.author.value===""){
+            this.ErrorMessage = "Author field can not be empty";
+            this.setState({
+                showError: true
+            });
+            return false;
+        }
+        if(this.cost.value==="" || !(/^\d+$/).test(this.cost.value)){
+            this.ErrorMessage = "Cost field can't be empty and It should be a number";
+            this.setState({
+                showError: true
+            });
+            return false;
+        }
+        if(this.pages.value==="" || !(/^\d+$/).test(this.pages.value)){
+            this.ErrorMessage = "Pages field can not be empty and It should be a number";
+            this.setState({
+                showError: true
+            });
+            return false;
+        }
+
+        this.setState({
+            showError: false
+        });
+        return true;
     }
 
     render() {
@@ -68,9 +108,14 @@ class AddBook extends React.Component<any,State>{
                         <Button color="success" onClick={this.saveBook}>Save</Button>
                     </Form>
                 </Col>
+                {this.state.showError && 
+                    <Alert color="danger" className="margin20">
+                        {this.ErrorMessage}
+                    </Alert>
+                }
 
                 {this.state.showAlert?
-                    <Alert className="margin20" color="success">
+                    <Alert color="success" className="margin20">
                         Book Saved Successfully !!
                     </Alert>:""
                 }
