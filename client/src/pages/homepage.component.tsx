@@ -5,15 +5,18 @@ import { browserHistory } from 'react-router';
 import * as bookApi from '../api/bookapi';
 import { connect } from 'react-redux';
 import { setBooks } from '../store/actions/bookActions';
-import { Button, Container, Row, Col, Jumbotron,Label } from 'reactstrap';
+import { Button, Container, Row, Col, Jumbotron, Label, Modal, ModalBody, ModalHeader, ModalFooter,Alert} from 'reactstrap';
 
 interface State {
-    books: any;
+    books: any,
+    modal: boolean,
+    bookDeleted: boolean,
+    errorMessage:any
 }
 
 class HomePage extends Component<any, State>{
     books: Array<Book> = [];
-
+    deleteBookId: any;
     //search Properties
     searchByType: any;
     searchByText: any;
@@ -23,12 +26,69 @@ class HomePage extends Component<any, State>{
 
     constructor(props: any) {
         super(props);
+        this.state = {
+            books: [],
+            modal: false,
+            bookDeleted: false,
+            errorMessage:null
+        };
+
         this.searchBooks = this.searchBooks.bind(this);
         this.sortBooks = this.sortBooks.bind(this);
+        this.editBook = this.editBook.bind(this);
+        this.deleteBook = this.deleteBook.bind(this);
+        this.toggle = this.toggle.bind(this);
+        this.deleteConfimation = this.deleteConfimation.bind(this);
+    }
+
+    toggle() {
+        this.setState(prevState => ({
+            modal: !prevState.modal
+        }));
+    }
+
+    deleteConfimation(_id: any) {
+        if (!this.state.modal) {
+            this.toggle();
+            this.deleteBookId = _id;
+        }
+        else {
+            this.deleteBook(this.deleteBookId);
+            this.toggle();
+        }
     }
 
     addBooks() {
         browserHistory.push('/addbook');
+    }
+
+    editBook(book: any) {
+        this.props.editBook(book);
+        browserHistory.push('/addbook');
+    }
+
+    deleteBook(id: any) {
+        let Book_id = {
+            _id: id
+        }
+        bookApi.deleteBook(Book_id)
+            .then((result) => {
+                console.log("Book deleted!");
+                this.setState({
+                    bookDeleted: true
+                });
+                this.props.deleteBook(id);
+                setTimeout(()=>{
+                    this.setState({
+                        bookDeleted: false
+                    });
+                },2000);
+            })
+            .catch((err) => {
+                this.setState({
+                    errorMessage:"Error while deleting a book:"+{err}
+                });
+            });
     }
 
     componentDidMount() {
@@ -38,9 +98,12 @@ class HomePage extends Component<any, State>{
                 this.props.setBooks(this.books);
             })
             .catch((err) => {
-                console.log(err);
+                this.setState({
+                    errorMessage:"Error while fetching books:"+{err}
+                });
             });
     }
+
 
     searchBooks() {
         let books = this.books;
@@ -67,10 +130,10 @@ class HomePage extends Component<any, State>{
         let sortByType = this.sortByType.value;
 
         let sortedBooks = books.sort((a: any, b: any) => {
-            if(sortByType!="cost" && sortByType!="pages")
+            if (sortByType != "cost" && sortByType != "pages")
                 return a[sortByType].localeCompare(b[sortByType]);
             else
-                return parseFloat(a[sortByType])-parseFloat(b[sortByType]);
+                return parseFloat(a[sortByType]) - parseFloat(b[sortByType]);
         });
 
         this.props.setBooks(sortedBooks);
@@ -87,10 +150,10 @@ class HomePage extends Component<any, State>{
                         </Col>
                     </Row>
                     <Row>
-                        <Col xs="6">
-                            <BookList bookList={this.props.books} currentPage={this.props.current_page}></BookList>
+                        <Col xs="7">
+                            <BookList bookList={this.props.books} currentPage={this.props.current_page} editBook={this.editBook} deleteBook={this.deleteConfimation}></BookList>
                         </Col>
-                        <Col xs="6">
+                        <Col xs="5">
                             <Button className="margin20" color="info" onClick={this.addBooks}>Add Books</Button>
                             <Jumbotron>
                                 <h4>Search Criteria</h4>
@@ -119,8 +182,29 @@ class HomePage extends Component<any, State>{
                                 <Button color="info" onClick={this.sortBooks}>Sort</Button>
                             </Jumbotron>
                         </Col>
+                        {this.state.bookDeleted && 
+                            <Alert color="success" className="margin20">
+                                Book Deleted Successfully !!
+                            </Alert> 
+                        }
                     </Row>
                 </Container>
+                {this.state.errorMessage ?
+                    <Alert color="danger" className="margin20">
+                        {this.state.errorMessage}
+                    </Alert> : ""
+                }
+
+                <Modal isOpen={this.state.modal} toggle={this.toggle} >
+                    <ModalHeader toggle={this.toggle}>Modal title</ModalHeader>
+                    <ModalBody>
+                        Are you sure you want to delete Book ?
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="primary" onClick={this.toggle}>Cancel</Button>{' '}
+                        <Button color="secondary" onClick={this.deleteConfimation}>Delete</Button>
+                    </ModalFooter>
+                </Modal>
             </div>
         )
     }
@@ -129,12 +213,14 @@ class HomePage extends Component<any, State>{
 const mapStateToProps = (state: any) => {
     return {
         books: state.books,
-        current_page:state.currentPage
+        current_page: state.currentPage
     }
 }
 
 const mapDispatchToProps = (dispatch: any) => ({
-    setBooks: (books: any) => dispatch(setBooks(books))
+    setBooks: (books: any) => dispatch(setBooks(books)),
+    editBook: (book: any) => dispatch({ type: 'EDIT_BOOK', book: book }),
+    deleteBook: (id: any) => dispatch({ type: 'DELETE_BOOK', _id: id })
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomePage);

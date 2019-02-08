@@ -24,6 +24,10 @@ body{
   padding : 0 5px;
 }
 
+.btnMargin{
+  margin:0 5px;
+}
+
 .margin20{
   margin:20px;
 }

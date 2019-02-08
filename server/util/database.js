@@ -1,27 +1,26 @@
-const mongodb = require('mongodb');
-
-const MongoClient = mongodb.MongoClient;
-let db;
-
-const mongoConnect = (callback) => {
-    MongoClient.connect('mongodb+srv://Rohit:QSf8oZ8VbyaKGQI1@cluster0-gss9d.mongodb.net/book?retryWrites=true',
-    { useNewUrlParser: true })
-        .then(client => {
-            console.log("Connected Successfully");
-            db = client.db();
-            callback();
-        })
-        .catch(err => {
-            console.log(err);
-        })
+"use strict";
+exports.__esModule = true;
+// const mongodb = require('mongodb');
+var mongodb_1 = require("mongodb");
+var MongoClient = mongodb_1["default"].MongoClient;
+var db;
+var mongoConnect = function (callback) {
+    MongoClient.connect('mongodb+srv://Rohit:QSf8oZ8VbyaKGQI1@cluster0-gss9d.mongodb.net/book?retryWrites=true', { useNewUrlParser: true })
+        .then(function (client) {
+        console.log("Connected Successfully");
+        db = client.db();
+        callback();
+    })["catch"](function (err) {
+        console.log(err);
+    });
 };
-
-const getDb = ()=> {
-    if(db)
+var getDb = function (name) {
+    if (db)
         return db;
     else
         throw 'No Database Found';
-}
-
-exports.mongoConnect = mongoConnect;
-exports.getDb = getDb;
+};
+exports["default"] = {
+    mongoConnect: mongoConnect,
+    getDb: getDb
+};

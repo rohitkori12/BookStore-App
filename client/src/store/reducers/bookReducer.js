@@ -1,5 +1,6 @@
 const initialState ={
     books:[],
+    editBook:{},
     currentPage:1
 };
 
@@ -20,6 +21,23 @@ export const BookReducer = (state=initialState,action)=>{
         return{
             ...state,
             currentPage: action.page
+        }
+    }
+    if(action.type==='EDIT_BOOK'){
+        return{
+            ...state,
+            editBook: action.book
+        }
+    }
+
+    if(action.type==='DELETE_BOOK'){
+        let updatedBooks  = state.books.filter((book)=>{
+            return book._id !== action._id;
+        });
+
+        return{
+            ...state,
+            books:updatedBooks
         }
     }
 

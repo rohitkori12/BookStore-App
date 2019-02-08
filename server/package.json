@@ -5,18 +5,25 @@
   "main": "index.js",
   "proxy": "http://localhost:8080/",
   "scripts": {
-    "start": "nodemon app.js",
+    "build": "tsc",
+    "start": "npm run build && npm run dev",
+    "dev": "nodemon ./dist/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/mongodb": "^3.1.19",
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
     "mongodb": "^3.1.13",
-    "nodemon": "^1.18.9"
+    "nodemon": "^1.18.9",
+    "ts-node": "^8.0.2"
   },
   "devDependencies": {
-    "body-parser": "^1.18.3"
+    "@types/express": "^4.16.1",
+    "@types/node": "^10.12.21",
+    "body-parser": "^1.18.3",
+    "typescript": "^3.3.1"
   }
 }

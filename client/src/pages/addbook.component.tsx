@@ -1,84 +1,129 @@
 import React, { Component } from 'react';
 import { browserHistory } from 'react-router';
 import * as bookApi from '../api/bookapi';
-import { Col, Button, Form, FormGroup ,Alert } from 'reactstrap';
+import { Col, Button, Form, FormGroup, Alert } from 'reactstrap';
+import { connect } from 'react-redux';
 
-interface State{
-    showAlert:boolean
-    showError: boolean
+interface State {
+    showSaveAlert: boolean,
+    showValidationError: boolean,
+    showEditAlert: boolean,
+    errorMessage:any
 }
 
-class AddBook extends Component<any,State>{
+class AddBook extends Component<any, State>{
     bookname: any;
     author: any;
     cost: any;
     pages: any;
-    ErrorMessage:any;
+    validationErrorMessage: any;
 
     constructor(props: any) {
         super(props);
-        this.state={
-            showAlert:false,
-            showError: false
+        this.state = {
+            showSaveAlert: false,
+            showEditAlert: false,
+            showValidationError: false,
+            errorMessage:null
         }
         this.saveBook = this.saveBook.bind(this);
         this.validate = this.validate.bind(this);
     }
 
+    
+
+    componentWillMount() {
+        if (this.props.editBook) {
+            this.bookname = this.props.editBook.name;
+            this.author = this.props.editBook.author;
+            this.cost = this.props.editBook.cost;
+            this.pages = this.props.editBook.pages;
+        }
+    }
+
     saveBook() {
         let book = {
+            _id: "",
             name: this.bookname.value,
             author: this.author.value,
             cost: this.cost.value,
             pages: this.pages.value
         };
-        if(this.validate()){
-            bookApi.saveBooks(book)
-                .then((res: any) => {
-                    console.log(res);
-                    this.setState({
-                        showAlert :true
+        if (this.validate()) {
+            if (this.props.editBook.length > 0) {
+                book._id = this.props.editBook._id;
+                bookApi.updateBook(book)
+                    .then((res: any) => {
+                        this.setState({
+                            showEditAlert: true
+                        });
+                        setTimeout(() => {
+                            browserHistory.push('/');
+                        }, 2000);
+                    })
+                    .catch((err)=>{
+                        this.setState({
+                            errorMessage:"Error while Updating the book:"+{err}
+                        });
+                    })
+            }
+            else {
+                bookApi.saveBooks(book)
+                    .then((res: any) => {
+                        console.log(res);
+                        this.setState({
+                            showSaveAlert: true
+                        });
+                        setTimeout(() => {
+                            browserHistory.push('/');
+                        }, 2000);
+                    })
+                    .catch((err)=>{
+                        this.setState({
+                            errorMessage:"Error while Saving the book:"+{err}
+                        });
                     });
-
-                    setTimeout(()=>{
-                        browserHistory.push('/');
-                    },2000);
-                });
+            }
         }
     }
 
-    validate(){
-        if(this.bookname.value===""){
-            this.ErrorMessage = "Book name field can not be empty";
+    componentWillUnmount() {
+        // setting editBook state to empty
+        this.props.setEditBook({});
+    }
+
+    validate() {
+        if (this.bookname.value === "") {
+            this.validationErrorMessage = "Book name field can not be empty";
             this.setState({
-                showError: true
+                showValidationError: true
             });
             return false;
         }
-        if(this.author.value===""){
-            this.ErrorMessage = "Author field can not be empty";
+        if (this.author.value === "") {
+            this.validationErrorMessage = "Author field can not empty";
             this.setState({
-                showError: true
+                showValidationError: true
             });
             return false;
         }
-        if(this.cost.value==="" || !(/^\d+$/).test(this.cost.value)){
-            this.ErrorMessage = "Cost field can't be empty and It should be a number";
+        if (this.cost.value === "" || !(/^\d+$/).test(this.cost.value)) {
+            this.validationErrorMessage = "Cost field can't be empty and It should be a number";
             this.setState({
-                showError: true
+                showValidationError: true
             });
             return false;
         }
-        if(this.pages.value==="" || !(/^\d+$/).test(this.pages.value)){
-            this.ErrorMessage = "Pages field can not be empty and It should be a number";
+        if (this.pages.value === "" || !(/^\d+$/).test(this.pages.value)) {
+            this.validationErrorMessage = "Pages field can not be empty and It should be a number";
             this.setState({
-                showError: true
+                showValidationError: true
             });
             return false;
         }
 
         this.setState({
-            showError: false
+            showValidationError: false
         });
         return true;
     }
@@ -91,39 +136,59 @@ class AddBook extends Component<any,State>{
                     <Form>
                         <FormGroup>
                             <label>Name :</label>
-                            <input className="form-control" type="text" id="bookname" ref={(input) => { this.bookname = input }}></input>
+                            <input className="form-control" type="text" id="bookname" defaultValue={this.bookname ? this.bookname : ""} ref={(input) => { this.bookname = input }}></input>
                         </FormGroup>
                         <FormGroup>
                             <label>Author :</label>
-                            <input className="form-control" type="text" id="author" ref={(input) => { this.author = input }}></input>
+                            <input className="form-control" type="text" id="author" defaultValue={this.author ? this.author : ""} ref={(input) => { this.author = input }}></input>
                         </FormGroup>
                         <FormGroup>
                             <label>Cost :</label>
-                            <input className="form-control" type="text" id="cost" ref={(input) => { this.cost = input }}></input>
+                            <input className="form-control" type="text" id="cost" defaultValue={this.cost ? this.cost : ""} ref={(input) => { this.cost = input }}></input>
                         </FormGroup>
                         <FormGroup>
                             <label>Pages :</label>
-                            <input className="form-control" type="text" id="pages" ref={(input) => { this.pages = input }}></input>
+                            <input className="form-control" type="text" id="pages" defaultValue={this.pages ? this.pages : ""} ref={(input) => { this.pages = input }}></input>
                         </FormGroup>
                         <Button color="success" onClick={this.saveBook}>Save</Button>
                     </Form>
                 </Col>
-                {this.state.showError && 
+                {this.state.showValidationError &&
                     <Alert color="danger" className="margin20">
-                        {this.ErrorMessage}
+                        {this.validationErrorMessage}
                     </Alert>
                 }
-
-                {this.state.showAlert?
+                {this.state.showSaveAlert ?
                     <Alert color="success" className="margin20">
                         Book Saved Successfully !!
-                    </Alert>:""
+                    </Alert> : ""
+                }
+                {this.state.showEditAlert ?
+                    <Alert color="success" className="margin20">
+                        Book Updated Successfully !!
+                    </Alert> : ""
+                }
+                {this.state.errorMessage ?
+                    <Alert color="danger" className="margin20">
+                        {this.state.errorMessage}
+                    </Alert> : ""
                 }
             </div>
         );
     }
 }
 
+const mapStateToProps = (state: any) => {
+    return {
+        editBook: state.editBook,
+        books: state.books
+    }
+}
 
+const mapDispatchToProps = (dispatch: any) => {
+    return {
+        setEditBook: (book: any) => { dispatch({ type: 'EDIT_BOOK', book: book }) }
+    }
+}
 
-export default AddBook;
+export default connect(mapStateToProps, mapDispatchToProps)(AddBook);
