@@ -50,7 +50,7 @@ class AddBook extends Component<any, State>{
             pages: this.pages.value
         };
         if (this.validate()) {
-            if (this.props.editBook && this.props.editBook.id!=="") {
+            if (this.props.editBook && this.props.editBook._id!=="") {
                 book._id = this.props.editBook._id;
                 bookApi.updateBook(book)
                     .then((res: any) => {

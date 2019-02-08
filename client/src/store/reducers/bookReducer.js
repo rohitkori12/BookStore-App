@@ -1,6 +1,6 @@
 const initialState ={
     books:[],
-    editBook:{},
+    editBook:null,
     currentPage:1
 };
 
