@@ -25,7 +25,7 @@ class BookList extends Component<any, {}>{
         if (index >= start_offset && start_count < per_page) {
           start_count++;
           return (
-            <tr key={book.name}>
+            <tr key={book._id}>
               <td>{book.name}</td>
               <td>{book.author}</td>
               <td>{book.cost}</td>

@@ -50,7 +50,7 @@ class AddBook extends Component<any, State>{
             pages: this.pages.value
         };
         if (this.validate()) {
-            if (this.props.editBook.length > 0) {
+            if (this.props.editBook && this.props.editBook.id!=="") {
                 book._id = this.props.editBook._id;
                 bookApi.updateBook(book)
                     .then((res: any) => {
@@ -89,7 +89,7 @@ class AddBook extends Component<any, State>{
 
     componentWillUnmount() {
         // setting editBook state to empty
-        this.props.setEditBook({});
+        this.props.setEditBook(null);
     }
 
     validate() {
