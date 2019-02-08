@@ -13,7 +13,7 @@ This Project contains both frontend and backend. We are running both frontend as
     App> cd client
     App/client> npm install
     
-### 4. Move to the root folder and install node packages for concurrently :
+### 4. Move to the root folder and install node packages for concurrently package:
     App> npm install
    
 ### 5. Run npm start to start the application:
