@@ -6,6 +6,7 @@ import * as bookApi from '../api/bookapi';
 import { connect } from 'react-redux';
 import { setBooks } from '../store/actions/bookActions';
 import { Button, Container, Row, Col, Jumbotron, Label, Modal, ModalBody, ModalHeader, ModalFooter,Alert} from 'reactstrap';
+import logger from '../winston.config';
 
 interface State {
     books: any,
@@ -92,6 +93,7 @@ class HomePage extends Component<any, State>{
     }
 
     componentDidMount() {
+        logger.info("Inside Homepage using winston logger");
         bookApi.getBooks()
             .then((result) => {
                 this.books = result;
@@ -103,7 +105,6 @@ class HomePage extends Component<any, State>{
                 });
             });
     }
-
 
     searchBooks() {
         let books = this.books;
@@ -196,7 +197,7 @@ class HomePage extends Component<any, State>{
                 }
 
                 <Modal isOpen={this.state.modal} toggle={this.toggle} >
-                    <ModalHeader toggle={this.toggle}>Modal title</ModalHeader>
+                    <ModalHeader toggle={this.toggle}>Delete Book</ModalHeader>
                     <ModalBody>
                         Are you sure you want to delete Book ?
                     </ModalBody>
